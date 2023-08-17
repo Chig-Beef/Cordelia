@@ -1,0 +1,121 @@
+Variable checking:
+When passing around variables, there are 3 ways to do so
+value => The actual value gets passed and is no longer present
+@value => An immutable reference to the value is made
+&value => A complete mutable copy of the value is made
+
+Keywords:
+fun   => Defines a code block
+cls   => Defines a class
+stt   => Defines a struct
+true  => True
+false => False
+null  => Nothing
+mut   => Creates a mutable variable
+const => Creates an immutable variable
+noas  => Creates a variable that can't be reassigned, but can be tampered with
+loop  => Takes up to 3 operands to  decide when to stop
+if    => Completes a block if true
+elif  => Completes a block if true, doesn't if a previous block was true
+else  => Completes if no other blocks were true
+
+Types:
+lam    => Code block
+num    => High level abstracted way of representing any type of number
+int    => An integer that can scale in size
+intx   => int of size x (8, 16, 32, 64)
+unt    => An unsigned integer that can scale in size
+untx   => unt of size x (8, 16, 32, 64)
+bool   => true/false
+char   => A single ascii character
+str    => A collection of characters
+float  => A number that includes decimal places
+double => A float with twice as many decimal places
+acc    => An accurate float
+
+Structures:
+list  => A mutable collection of scalable size
+array => A mutable collection of fixed size
+tuple => An immutable collection of fixed size
+stack => An immutable collection that allows appends
+map   => A collection of key:value pairs
+tree  => A tree system of nodes and branches
+
+Syntax:
+Curly braces
+Semicolons
+
+Operators:
++  => Addition
+-  => Subtraction
+*  => Multiplication
+/  => Divide
+** => Exponents
+// => Roots (Inverse exponents)
+&  => Binary AND
+|  => Binary OR
+!  => Binary NOT
+^  => Binary XOR
+=  => Assigns a variable
+== => Checks if the 2 values are equal
+!= => Checks if the 2 values aren't equal
+>  => Checks if the left value is larger than the right
+<  => Checks if the right value is larger than the left
+=> => Checks if the left value is larger than or equal to the right
+=< => Checks if the right value is larger than or equal to the left
+%  => Takes the first value modulo second
+++ => Increment
+-- => Deincrement
+
+In-Built Functions:
+out(value) => Takes a str and logs it in the console
+in()       => Takes a line from the console for use in the program
+
+In-Built Class Methods:
+value.to(module) => Converts an immutable reference of a module into the module type
+
+Example code 1:
+
+const int x = 7;
+const int y = 3;
+const int z = x * y;
+out(z.to(str))
+
+Example code 2:
+
+mut bool prime;
+for (int i = 2; i < 100; i++) {
+	prime = true;
+	for (int j = 2; j < i; j++) {
+		if (i % j == 0) {
+			prime = false;
+		}
+	}
+	if (prime) {
+		out(i.to(str));
+	}
+}
+
+Example code 3:
+
+mut bool prime;
+mut float root;
+for (int i = 2; i < 100; i++) {
+	prime = true;
+	root = i // 2;
+	for (int j = 2; j <= root; j++) {
+		if (i % j == 0) prime = false;
+	}
+	if (prime) out(i.to(str));
+}
+
+
+
+
+
+
+
+
+
+
+
