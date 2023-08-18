@@ -37,7 +37,7 @@ Structures:
 list  => A mutable collection of scalable size
 array => A mutable collection of fixed size
 tuple => An immutable collection of fixed size
-stack => An immutable collection that allows appends
+stack => An immutable collection that allows appends and pops
 map   => A collection of key:value pairs
 tree  => A tree system of nodes and branches
 
@@ -61,8 +61,8 @@ Operators:
 != => Checks if the 2 values aren't equal
 >  => Checks if the left value is larger than the right
 <  => Checks if the right value is larger than the left
-=> => Checks if the left value is larger than or equal to the right
-=< => Checks if the right value is larger than or equal to the left
+>= => Checks if the left value is larger than or equal to the right
+<= => Checks if the right value is larger than or equal to the left
 %  => Takes the first value modulo second
 ++ => Increment
 -- => Deincrement
