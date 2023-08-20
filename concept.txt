@@ -3,6 +3,7 @@ When passing around variables, there are 3 ways to do so
 value => The actual value gets passed and is no longer present
 @value => An immutable reference to the value is made
 &value => A complete mutable copy of the value is made
+Variables are always freed at end of block
 
 Keywords:
 fun   => Defines a code block
@@ -108,7 +109,6 @@ for (int i = 2; i < 100; i++) {
 	}
 	if (prime) out(i.to(str));
 }
-
 
 
 

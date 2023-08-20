@@ -17,5 +17,23 @@ func main() {
 		0,
 	}
 
-	lexer.tokenize()
+	lexedSource := lexer.tokenize()
+	/*for _, tkn := range lexedSource {
+		fmt.Println(tkn.text)
+	}*/
+
+	parser := Parser{
+		dat,
+		lexedSource,
+		0,
+		Token{},
+	}
+
+	parsedSource, err := parser.parse()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(parsedSource)
 }

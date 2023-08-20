@@ -12,12 +12,12 @@ block := "{" { statement } "}"
 
 ref := "@" | "&"
 
-expression := ident [operator ident]
+expression := (ident | primary) [operator (ident | primary)]
 
 comparison := ident [boperator ident]
 
 operator := "+" | "-" | "*" | "/" | "%"
 
-boperator := "&" | "|" | "!=" | "==" | "<" | "." | "<=" | ">="
+boperator := "&" | "|" | "!=" | "==" | "<" | ">" | "<=" | ">="
 
 el := ";"

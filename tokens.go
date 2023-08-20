@@ -1,25 +1,74 @@
 package main
 
+import "golang.org/x/exp/slices"
+
 type Token struct {
 	code     int
 	text     string
 	children []Token
 }
 
+func createToken(code int, text string) Token {
+	return Token{
+		code,
+		text,
+		[]Token{},
+	}
+}
+
+func isKeyword(word string) bool {
+	return slices.Contains(keyWords, word)
+}
+
+func isType(word string) bool {
+	return slices.Contains(types, word)
+}
+
+func isBool(word string) bool {
+	return slices.Contains(bools, word)
+}
+
+var bools []string = []string{
+	"true",
+	"false",
+}
+
+var types []string = []string{
+	"int",
+}
+
+var keyWords []string = []string{
+	"fun",
+	"mut",
+	"const",
+	"noas",
+	"loop",
+	"if",
+	"elif",
+	"else",
+	"cls",
+	"stt",
+	"null",
+	"false",
+	"true",
+}
+
 var tokens map[string]int = map[string]int{
 	// Other
 	"EOF":        0,
-	"EL":         1,
-	"IDENT":      2,
-	"REF":        3,
-	"OPERATOR":   4,
-	"COMPARATOR": 5,
-	"EXPRESSION": 6,
-	"TYPE":       7,
-	"PRIMARY":    8,
-	"ILLEGAL":    9,
+	"ILLEGAL":    1,
+	"INDECISIVE": 2,
+	"EL":         3,
+	"IDENT":      4,
+	"REF":        5,
+	"OPERATOR":   6,
+	"COMPARATOR": 7,
+	"TYPE":       8,
+	"PRIMARY":    9,
 	"DELIMETER":  10,
 	"ACCESSOR":   11,
+	"NOT":        12,
+	"ASSIGN":     13,
 
 	// Keywords
 	"FUN":   20,
@@ -43,4 +92,11 @@ var tokens map[string]int = map[string]int{
 	"RSQUARE":  45,
 	"LANGLE":   46,
 	"RANGLE":   47,
+
+	// Parsing
+	"PROGRAM":    100,
+	"BLOCK":      101,
+	"EXPRESSION": 102,
+	"COMPARISON": 103,
+	"STATEMENT":  104,
 }
