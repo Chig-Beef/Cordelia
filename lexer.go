@@ -22,6 +22,10 @@ func (lxr *Lexer) tokenize() []Token {
 		token := createToken(tokens["ILLEGAL"], "")
 
 		switch lxr.curChar {
+		case '`':
+			for lxr.curChar != '\n' && lxr.curChar != '\r' {
+				lxr.getNextChar()
+			}
 		case '+':
 			token = createToken(tokens["OPERATOR"], "+")
 		case '-':
@@ -37,17 +41,43 @@ func (lxr *Lexer) tokenize() []Token {
 		case '@':
 			token = createToken(tokens["REF"], "@")
 		case '!':
-			token = createToken(tokens["NOT"], "!")
+			if lxr.getPeek() == '=' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], "!=")
+			} else {
+				token = createToken(tokens["NOT"], "!")
+			}
 		case '=':
-			token = createToken(tokens["ASSIGN"], "=")
+			if lxr.getPeek() == '=' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], "==")
+			} else {
+				token = createToken(tokens["ASSIGN"], "=")
+			}
+		case '|':
+			token = createToken(tokens["BOPERATOR"], "|")
 		case '<':
-			token = createToken(tokens["INDECISIVE"], "<")
+			if lxr.getPeek() == '=' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], "<=")
+			} else {
+				token = createToken(tokens["INDECISIVE"], "<")
+			}
 		case '>':
-			token = createToken(tokens["INDECISIVE"], ">")
+			if lxr.getPeek() == '=' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], ">=")
+			} else {
+				token = createToken(tokens["INDECISIVE"], ">")
+			}
 		case '(':
 			token = createToken(tokens["LBRACE"], "(")
 		case ')':
 			token = createToken(tokens["RBRACE"], ")")
+		case '{':
+			token = createToken(tokens["LSQUIRLY"], "{")
+		case '}':
+			token = createToken(tokens["RSQUIRLY"], "}")
 		case '[':
 			token = createToken(tokens["LSQUARE"], "[")
 		case ']':

@@ -3,10 +3,11 @@ program := { statement }
 statement :=
     fun ["(" type ref ident ")"] ident "("(type ident ",")+")" block
     mut type ident ["=" expression] el
-    const type ident ["=" expression] el
+    const type ident "=" expression el
     noas type ident ["=" expression] el
-    loop [type ident "=" expression el] [comparison el] [ident "=" expression el] block\
+    loop [type ident "=" expression] el [comparison] el [ident "=" expression] el block
     if comparison block ([elif comparison block])+ [else block]
+    ident "=" expression el
 
 block := "{" { statement } "}"
 
@@ -14,7 +15,7 @@ ref := "@" | "&"
 
 expression := (ident | primary) [operator (ident | primary)]
 
-comparison := ident [boperator ident]
+comparison := (ident | primary) [boperator (ident | primary)]
 
 operator := "+" | "-" | "*" | "/" | "%"
 

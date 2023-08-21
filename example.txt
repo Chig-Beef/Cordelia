@@ -1,3 +1,4 @@
-const int x = 7;
-const int y = 3;
-const int z = x * y;
+`` COmment here
+loop int i = 0; i <= 10; i = i + 1; {
+    const int z = x * y;
+}

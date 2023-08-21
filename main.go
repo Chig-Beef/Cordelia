@@ -18,9 +18,10 @@ func main() {
 	}
 
 	lexedSource := lexer.tokenize()
-	/*for _, tkn := range lexedSource {
+	for _, tkn := range lexedSource {
 		fmt.Println(tkn.text)
-	}*/
+		fmt.Println(tkn.code)
+	}
 
 	parser := Parser{
 		dat,
@@ -35,5 +36,5 @@ func main() {
 		return
 	}
 
-	fmt.Println(parsedSource)
+	parsedSource.print("")
 }

@@ -45,6 +45,8 @@ tree  => A tree system of nodes and branches
 Syntax:
 Curly braces
 Semicolons
+`` => single Line comment
+``` => Multi Line comment
 
 Operators:
 +  => Addition
@@ -80,19 +82,19 @@ Example code 1:
 const int x = 7;
 const int y = 3;
 const int z = x * y;
-out(z.to(str))
+out(z.to(str));
 
 Example code 2:
 
 mut bool prime;
-for (int i = 2; i < 100; i++) {
+loop int i = 2; i < 100; i = i + 1; {
 	prime = true;
-	for (int j = 2; j < i; j++) {
+	loop int j = 2; j < i; j++; {
 		if (i % j == 0) {
 			prime = false;
 		}
 	}
-	if (prime) {
+	if prime {
 		out(i.to(str));
 	}
 }
@@ -101,15 +103,18 @@ Example code 3:
 
 mut bool prime;
 mut float root;
-for (int i = 2; i < 100; i++) {
+loop int i = 2; i < 100; i++; {
 	prime = true;
 	root = i // 2;
-	for (int j = 2; j <= root; j++) {
-		if (i % j == 0) prime = false;
+	loop int j = 2; j <= root; j++; {
+		if i % j == 0 {
+			prime = false;
+		}
 	}
-	if (prime) out(i.to(str));
+	if prime {
+		out(i.to(str));
+	}
 }
-
 
 
 

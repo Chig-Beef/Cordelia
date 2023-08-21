@@ -1,11 +1,22 @@
 package main
 
-import "golang.org/x/exp/slices"
+import (
+	"fmt"
+
+	"golang.org/x/exp/slices"
+)
 
 type Token struct {
 	code     int
 	text     string
 	children []Token
+}
+
+func (token Token) print(indent string) {
+	fmt.Println(indent + getTokenKey(token.code))
+	for _, child := range token.children {
+		child.print(indent + "\t")
+	}
 }
 
 func createToken(code int, text string) Token {
@@ -26,6 +37,15 @@ func isType(word string) bool {
 
 func isBool(word string) bool {
 	return slices.Contains(bools, word)
+}
+
+func getTokenKey(code int) string {
+	for key, val := range tokens {
+		if code == val {
+			return key
+		}
+	}
+	return ""
 }
 
 var bools []string = []string{
@@ -69,6 +89,7 @@ var tokens map[string]int = map[string]int{
 	"ACCESSOR":   11,
 	"NOT":        12,
 	"ASSIGN":     13,
+	"BOPERATOR":  14,
 
 	// Keywords
 	"FUN":   20,
