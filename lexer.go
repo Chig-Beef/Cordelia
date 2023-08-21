@@ -26,18 +26,35 @@ func (lxr *Lexer) tokenize() []Token {
 			for lxr.curChar != '\n' && lxr.curChar != '\r' {
 				lxr.getNextChar()
 			}
+			lxr.getNextCharNoWhiteSpace()
+			continue
 		case '+':
 			token = createToken(tokens["OPERATOR"], "+")
 		case '-':
 			token = createToken(tokens["OPERATOR"], "-")
 		case '*':
-			token = createToken(tokens["OPERATOR"], "*")
+			if lxr.getPeek() == '*' {
+				lxr.getNextChar()
+				token = createToken(tokens["OPERATOR"], "**")
+			} else {
+				token = createToken(tokens["OPERATOR"], "*")
+			}
 		case '/':
-			token = createToken(tokens["OPERATOR"], "/")
+			if lxr.getPeek() == '/' {
+				lxr.getNextChar()
+				token = createToken(tokens["OPERATOR"], "//")
+			} else {
+				token = createToken(tokens["OPERATOR"], "/")
+			}
 		case '%':
 			token = createToken(tokens["OPERATOR"], "%")
 		case '&':
-			token = createToken(tokens["INDECISIVE"], "&")
+			if lxr.getPeek() == '&' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], "&&")
+			} else {
+				token = createToken(tokens["REF"], "&")
+			}
 		case '@':
 			token = createToken(tokens["REF"], "@")
 		case '!':
@@ -55,7 +72,10 @@ func (lxr *Lexer) tokenize() []Token {
 				token = createToken(tokens["ASSIGN"], "=")
 			}
 		case '|':
-			token = createToken(tokens["BOPERATOR"], "|")
+			if lxr.getPeek() == '|' {
+				lxr.getNextChar()
+				token = createToken(tokens["BOPERATOR"], "||")
+			}
 		case '<':
 			if lxr.getPeek() == '=' {
 				lxr.getNextChar()
@@ -86,6 +106,8 @@ func (lxr *Lexer) tokenize() []Token {
 			token = createToken(tokens["EL"], ";")
 		case '.':
 			token = createToken(tokens["ACCESSOR"], ".")
+		case ',':
+			token = createToken(tokens["DELIMETER"], ",")
 		}
 
 		if unicode.IsLetter(rune(lxr.curChar)) {

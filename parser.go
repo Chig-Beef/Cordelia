@@ -5,6 +5,20 @@ type Parser struct {
 	source    []Token
 	curPos    int
 	curToken  Token
+	markers   []int
+}
+
+func (psr *Parser) setMarker() {
+	psr.markers = append(psr.markers, psr.curPos)
+}
+
+func (psr *Parser) gotoMarker() {
+	psr.curPos = psr.markers[len(psr.markers)-1]
+	psr.curToken = psr.source[psr.curPos]
+}
+
+func (psr *Parser) removeMarker() {
+	psr.markers = psr.markers[:len(psr.markers)-1]
 }
 
 func (psr *Parser) getNextToken() {
@@ -40,31 +54,106 @@ func (psr *Parser) statement() (Token, error) {
 	tkn := createToken(tokens["STATEMENT"], "")
 	switch psr.curToken.code {
 	case tokens["FUN"]:
+		tkn.children = append(tkn.children, createToken(tokens["FUN"], "fun"))
+		psr.getNextToken()
+
+		if psr.curToken.code == tokens["LBRACE"] {
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code != tokens["TYPE"] {
+				return tkn, createError("Parser", "statement -> FUN", "Expected \"TYPE\"")
+			}
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code == tokens["REF"] {
+				tkn.children = append(tkn.children, createToken(tokens["LBRACE"], "("))
+				psr.getNextToken()
+			}
+
+			if psr.curToken.code != tokens["IDENT"] {
+				return tkn, createError("Parser", "statement -> FUN", "Expected \"IDENT\"")
+			}
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code != tokens["RBRACE"] {
+				return tkn, createError("Parser", "statement -> FUN", "Expected \"RBRACE\"")
+			}
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+		}
+
+		if psr.curToken.code != tokens["IDENT"] {
+			return tkn, createError("Parser", "statement -> FUN", "Expected \"IDENT\"")
+		}
+		tkn.children = append(tkn.children, psr.curToken)
+		psr.getNextToken()
+
+		if psr.curToken.code != tokens["LBRACE"] {
+			return tkn, createError("Parser", "statement -> FUN", "Expected \"LBRACE\"")
+		}
+		tkn.children = append(tkn.children, psr.curToken)
+		psr.getNextToken()
+
+		for psr.curToken.code == tokens["TYPE"] {
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code != tokens["IDENT"] {
+				return tkn, createError("Parser", "statement -> FUN", "Expected \"IDENT\"")
+			}
+			tkn.children = append(tkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code == tokens["DELIMETER"] {
+				if psr.peekToken().code != tokens["TYPE"] {
+					return tkn, createError("Parser", "statement -> FUN", "Expected \"TYPE\"")
+				}
+				tkn.children = append(tkn.children, psr.curToken)
+				psr.getNextToken()
+			}
+		}
+
+		if psr.curToken.code != tokens["RBRACE"] {
+			return tkn, createError("Parser", "statement -> FUN", "Expected \"RBRACE\"")
+		}
+		tkn.children = append(tkn.children, psr.curToken)
+		psr.getNextToken()
+
+		temp, err := psr.block()
+		if err != nil {
+			return tkn, err
+		}
+		tkn.children = append(tkn.children, temp)
 	case tokens["MUT"]:
-		tkn.children = append(tkn.children, createToken(tokens["MUT"], "mut"))
+		subTkn := createToken(tokens["ASSIGNMENT"], "")
+
+		subTkn.children = append(subTkn.children, createToken(tokens["MUT"], "mut"))
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["TYPE"] {
 			return tkn, createError("Parser", "statement -> MUT", "Expected \"TYPE\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["IDENT"] {
 			return tkn, createError("Parser", "statement -> MUT", "Expected \"IDENT\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code == tokens["ASSIGN"] {
-			tkn.children = append(tkn.children, psr.curToken)
+			subTkn.children = append(subTkn.children, psr.curToken)
 			psr.getNextToken()
 
 			temp, err := psr.expression()
 			if err != nil {
 				return tkn, err
 			}
-			tkn.children = append(tkn.children, temp)
+			subTkn.children = append(subTkn.children, temp)
 			psr.getNextToken()
 		}
 
@@ -72,76 +161,97 @@ func (psr *Parser) statement() (Token, error) {
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
+		tkn.children = append(tkn.children, subTkn)
 	case tokens["CONST"]:
-		tkn.children = append(tkn.children, createToken(tokens["CONST"], "const"))
+		subTkn := createToken(tokens["ASSIGNMENT"], "")
+
+		subTkn.children = append(subTkn.children, createToken(tokens["CONST"], "const"))
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["TYPE"] {
 			return tkn, createError("Parser", "statement -> CONST", "Expected \"TYPE\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["IDENT"] {
 			return tkn, createError("Parser", "statement -> CONST", "Expected \"IDENT\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["ASSIGN"] {
 			return tkn, createError("Parser", "statement -> CONST", "Expected \"ASSIGN\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		temp, err := psr.expression()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
 		psr.getNextToken()
 
 		temp, err = psr.el()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
+		tkn.children = append(tkn.children, subTkn)
 	case tokens["NOAS"]:
-		tkn.children = append(tkn.children, createToken(tokens["NOAS"], "noas"))
+		subTkn := createToken(tokens["ASSIGNMENT"], "")
+
+		subTkn.children = append(subTkn.children, createToken(tokens["NOAS"], "noas"))
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["TYPE"] {
 			return tkn, createError("Parser", "statement -> NOAS", "Expected \"TYPE\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["IDENT"] {
 			return tkn, createError("Parser", "statement -> NOAS", "Expected \"IDENT\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["ASSIGN"] {
 			return tkn, createError("Parser", "statement -> NOAS", "Expected \"ASSIGN\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		temp, err := psr.expression()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
 		psr.getNextToken()
 
 		temp, err = psr.el()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
+		tkn.children = append(tkn.children, subTkn)
 	case tokens["IDENT"]:
+		temp, err := psr.call()
+		if err == nil {
+			tkn.children = append(tkn.children, temp)
+			psr.getNextToken()
+
+			temp, err = psr.el()
+			if err != nil {
+				return tkn, err
+			}
+			tkn.children = append(tkn.children, temp)
+
+			return tkn, nil
+		}
+
 		tkn.children = append(tkn.children, createToken(tokens["IDENT"], psr.curToken.text))
 		psr.getNextToken()
 
@@ -151,7 +261,7 @@ func (psr *Parser) statement() (Token, error) {
 		tkn.children = append(tkn.children, psr.curToken)
 		psr.getNextToken()
 
-		temp, err := psr.expression()
+		temp, err = psr.expression()
 		if err != nil {
 			return tkn, err
 		}
@@ -313,6 +423,58 @@ func (psr *Parser) statement() (Token, error) {
 	return tkn, nil
 }
 
+func (psr *Parser) call() (Token, error) {
+	tkn := createToken(tokens["CALL"], "")
+
+	psr.setMarker()
+
+	if psr.curToken.code != tokens["IDENT"] {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "call", "Expected \"IDENT\"")
+	}
+	tkn.children = append(tkn.children, psr.curToken)
+	psr.getNextToken()
+
+	if psr.curToken.code != tokens["LBRACE"] {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "call", "Expected \"LBRACE\"")
+	}
+	tkn.children = append(tkn.children, psr.curToken)
+	psr.getNextToken()
+
+	temp, err := psr.value()
+	for err == nil {
+		tkn.children = append(tkn.children, temp)
+		psr.getNextToken()
+
+		if psr.curToken.code != tokens["DELIMETER"] {
+			if psr.curToken.code == tokens["RBRACE"] {
+				break
+			}
+
+			psr.gotoMarker()
+			psr.removeMarker()
+			return tkn, createError("Parser", "call", "Expected \"DELIMETER\"")
+		}
+		tkn.children = append(tkn.children, psr.curToken)
+		psr.getNextToken()
+
+		temp, err = psr.value()
+	}
+
+	if psr.curToken.code != tokens["RBRACE"] {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "call", "Expected \"RBRACE\"")
+	}
+	tkn.children = append(tkn.children, psr.curToken)
+
+	psr.removeMarker()
+	return tkn, nil
+}
+
 func (psr *Parser) block() (Token, error) {
 	tkn := createToken(tokens["BLOCK"], "")
 
@@ -344,20 +506,22 @@ func (psr *Parser) block() (Token, error) {
 func (psr *Parser) expression() (Token, error) {
 	tkn := createToken(tokens["EXPRESSION"], "")
 
-	if psr.curToken.code != tokens["IDENT"] && psr.curToken.code != tokens["PRIMARY"] {
-		return tkn, createError("Parser", "expression", "Expected \"IDENT\" or \"PRIMARY\"")
+	temp, err := psr.value()
+	if err != nil {
+		return tkn, createError("Parser", "expression", "Expected \"VALUE\"")
 	}
-	tkn.children = append(tkn.children, psr.curToken)
+	tkn.children = append(tkn.children, temp)
 
 	for psr.peekToken().code == tokens["OPERATOR"] {
 		psr.getNextToken()
 		tkn.children = append(tkn.children, psr.curToken)
 		psr.getNextToken()
 
-		if psr.curToken.code != tokens["IDENT"] && psr.curToken.code != tokens["PRIMARY"] {
-			return tkn, createError("Parser", "expression", "Expected \"IDENT\" or \"PRIMARY\"")
+		temp, err = psr.value()
+		if err != nil {
+			return tkn, createError("Parser", "expression", "Expected \"VALUE\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		tkn.children = append(tkn.children, temp)
 	}
 
 	return tkn, nil
@@ -366,20 +530,22 @@ func (psr *Parser) expression() (Token, error) {
 func (psr *Parser) comparison() (Token, error) {
 	tkn := createToken(tokens["COMPARISON"], "")
 
-	if psr.curToken.code != tokens["IDENT"] && psr.curToken.code != tokens["PRIMARY"] {
-		return tkn, createError("Parser", "comparison", "Expected \"IDENT\" or \"PRIMARY\"")
+	temp, err := psr.value()
+	if err != nil {
+		return tkn, createError("Parser", "comparison", "Expected \"VALUE\"")
 	}
-	tkn.children = append(tkn.children, psr.curToken)
+	tkn.children = append(tkn.children, temp)
 
 	for psr.peekToken().code == tokens["BOPERATOR"] {
 		psr.getNextToken()
 		tkn.children = append(tkn.children, psr.curToken)
 		psr.getNextToken()
 
-		if psr.curToken.code != tokens["IDENT"] && psr.curToken.code != tokens["PRIMARY"] {
-			return tkn, createError("Parser", "comparison", "Expected \"IDENT\" or \"PRIMARY\"")
+		temp, err = psr.value()
+		if err != nil {
+			return tkn, createError("Parser", "comparison", "Expected \"VALUE\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		tkn.children = append(tkn.children, temp)
 	}
 
 	return tkn, nil
@@ -392,9 +558,16 @@ func (psr *Parser) el() (Token, error) {
 	return psr.curToken, nil
 }
 
-func (psr *Parser) ref() (Token, error) {
-	if psr.curToken.code != tokens["REF"] {
-		return psr.curToken, createError("Parser", "ref", "Expected \"REF\"")
+func (psr *Parser) value() (Token, error) {
+	if psr.curToken.code == tokens["PRIMARY"] {
+		return psr.curToken, nil
+	} else if psr.curToken.code == tokens["IDENT"] {
+		temp, err := psr.call()
+		if err == nil {
+			return temp, nil
+		}
+		return psr.curToken, nil
+	} else {
+		return psr.curToken, createError("Parser", "value", "Expected \"PRIMARY\" or \"IDENT\" or \"CALL\"")
 	}
-	return psr.curToken, nil
 }

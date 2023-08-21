@@ -7,9 +7,10 @@ import (
 )
 
 type Token struct {
-	code     int
-	text     string
-	children []Token
+	code      int
+	text      string
+	children  []Token
+	modifiers []string
 }
 
 func (token Token) print(indent string) {
@@ -24,6 +25,7 @@ func createToken(code int, text string) Token {
 		code,
 		text,
 		[]Token{},
+		[]string{},
 	}
 }
 
@@ -120,4 +122,6 @@ var tokens map[string]int = map[string]int{
 	"EXPRESSION": 102,
 	"COMPARISON": 103,
 	"STATEMENT":  104,
+	"CALL":       105,
+	"ASSIGNMENT": 106,
 }

@@ -1,4 +1,2 @@
-`` COmment here
-loop int i = 0; i <= 10; i = i + 1; {
-    const int z = x * y;
-}
+const int x = 10;
+x(5, 7);

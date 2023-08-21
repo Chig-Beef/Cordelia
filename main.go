@@ -18,16 +18,13 @@ func main() {
 	}
 
 	lexedSource := lexer.tokenize()
-	for _, tkn := range lexedSource {
-		fmt.Println(tkn.text)
-		fmt.Println(tkn.code)
-	}
 
 	parser := Parser{
 		dat,
 		lexedSource,
 		0,
 		Token{},
+		[]int{},
 	}
 
 	parsedSource, err := parser.parse()
@@ -36,5 +33,21 @@ func main() {
 		return
 	}
 
-	parsedSource.print("")
+	semanticizer := Semanticizer{
+		parsedSource,
+	}
+
+	err = semanticizer.checkValid(semanticizer.source, map[string][]string{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	optimizer := Optimizer{
+		parsedSource,
+	}
+
+	optimizedSource := optimizer.optimize(optimizer.source)
+
+	optimizedSource.print("")
 }
