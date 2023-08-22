@@ -1,6 +1,8 @@
 package main
 
-import "golang.org/x/exp/slices"
+import (
+	"golang.org/x/exp/slices"
+)
 
 type Semanticizer struct {
 	source Token
@@ -110,6 +112,22 @@ func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
 		}
 		newVar = append(newVar, "type:"+tkn.children[1].text)
 		data[tkn.children[2].text] = newVar
+	case tokens["DEFINITION"]:
+
+		err = nil
+		newVar := []string{"callable"}
+
+		index := 1
+		if tkn.children[index].code == tokens["IDENT"] {
+			data[tkn.children[index].text] = newVar
+		} else {
+			index++
+			for tkn.children[index].code != tokens["RBRACE"] {
+				index++
+			}
+			index++
+			data[tkn.children[index].text] = newVar
+		}
 	default:
 		return createError("Semantics", "checkValid", "Token not recognised")
 	}

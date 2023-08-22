@@ -57,6 +57,7 @@ var bools []string = []string{
 
 var types []string = []string{
 	"int",
+	"bool",
 }
 
 var keyWords []string = []string{
@@ -124,4 +125,5 @@ var tokens map[string]int = map[string]int{
 	"STATEMENT":  104,
 	"CALL":       105,
 	"ASSIGNMENT": 106,
+	"DEFINITION": 107,
 }
