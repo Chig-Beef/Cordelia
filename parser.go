@@ -280,42 +280,46 @@ func (psr *Parser) statement() (Token, error) {
 		tkn.children = append(tkn.children, createToken(tokens["LOOP"], "loop"))
 		psr.getNextToken()
 
+		subTkn := createToken(tokens["ASSIGNMENT"], "")
+
 		temp, err := psr.el()
 		if err == nil {
-			tkn.children = append(tkn.children, temp)
+			subTkn.children = append(subTkn.children, temp)
 		} else {
 			if psr.curToken.code != tokens["TYPE"] {
 				return tkn, createError("Parser", "statement -> LOOP -> Assignment", "Expected \"TYPE\"")
 			}
-			tkn.children = append(tkn.children, psr.curToken)
+			subTkn.children = append(subTkn.children, psr.curToken)
 			psr.getNextToken()
 
 			if psr.curToken.code != tokens["IDENT"] {
 				return tkn, createError("Parser", "statement -> LOOP -> Assignment", "Expected \"IDENT\"")
 			}
-			tkn.children = append(tkn.children, psr.curToken)
+			subTkn.children = append(subTkn.children, psr.curToken)
 			psr.getNextToken()
 
 			if psr.curToken.code != tokens["ASSIGN"] {
 				return tkn, createError("Parser", "statement -> LOOP -> Assignment", "Expected \"ASSIGN\"")
 			}
-			tkn.children = append(tkn.children, psr.curToken)
+			subTkn.children = append(subTkn.children, psr.curToken)
 			psr.getNextToken()
 
 			temp, err = psr.expression()
 			if err != nil {
 				return tkn, err
 			}
-			tkn.children = append(tkn.children, temp)
+			subTkn.children = append(subTkn.children, temp)
 			psr.getNextToken()
 
 			temp, err = psr.el()
 			if err != nil {
 				return tkn, err
 			}
-			tkn.children = append(tkn.children, temp)
+			subTkn.children = append(subTkn.children, temp)
 			psr.getNextToken()
 		}
+
+		tkn.children = append(tkn.children, subTkn)
 
 		temp, err = psr.el()
 		if err == nil {

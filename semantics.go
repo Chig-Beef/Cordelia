@@ -107,11 +107,20 @@ func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
 		newVar := []string{}
 		if tkn.children[0].code == tokens["MUT"] {
 			newVar = append(newVar, "change", "assign")
+			newVar = append(newVar, "type:"+tkn.children[1].text)
+			data[tkn.children[2].text] = newVar
 		} else if tkn.children[0].code == tokens["NOAS"] {
 			newVar = append(newVar, "change")
+			newVar = append(newVar, "type:"+tkn.children[1].text)
+			data[tkn.children[2].text] = newVar
+		} else if tkn.children[0].code == tokens["CONST"] {
+			newVar = append(newVar, "type:"+tkn.children[1].text)
+			data[tkn.children[2].text] = newVar
+		} else if tkn.children[0].code == tokens["TYPE"] {
+			newVar = append(newVar, "change", "assign")
+			newVar = append(newVar, "type:"+tkn.children[0].text)
+			data[tkn.children[1].text] = newVar
 		}
-		newVar = append(newVar, "type:"+tkn.children[1].text)
-		data[tkn.children[2].text] = newVar
 	case tokens["DEFINITION"]:
 
 		err = nil

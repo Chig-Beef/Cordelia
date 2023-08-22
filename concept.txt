@@ -90,7 +90,7 @@ mut bool prime;
 loop int i = 2; i < 100; i = i + 1; {
 	prime = true;
 	loop int j = 2; j < i; j++; {
-		if (i % j == 0) {
+		if i % j == 0 {
 			prime = false;
 		}
 	}
@@ -115,7 +115,6 @@ loop int i = 2; i < 100; i++; {
 		out(i.to(str));
 	}
 }
-
 
 
 

@@ -16,7 +16,7 @@ type Token struct {
 func (token Token) print(indent string) {
 	fmt.Println(indent + getTokenKey(token.code))
 	for _, child := range token.children {
-		child.print(indent + "\t")
+		child.print(indent + "    ")
 	}
 }
 
@@ -37,8 +37,8 @@ func isType(word string) bool {
 	return slices.Contains(types, word)
 }
 
-func isBool(word string) bool {
-	return slices.Contains(bools, word)
+func isPrimary(word string) bool {
+	return slices.Contains(primaryWords, word)
 }
 
 func getTokenKey(code int) string {
@@ -48,11 +48,6 @@ func getTokenKey(code int) string {
 		}
 	}
 	return ""
-}
-
-var bools []string = []string{
-	"true",
-	"false",
 }
 
 var types []string = []string{
@@ -71,6 +66,9 @@ var keyWords []string = []string{
 	"else",
 	"cls",
 	"stt",
+}
+
+var primaryWords []string = []string{
 	"null",
 	"false",
 	"true",

@@ -120,8 +120,8 @@ func (lxr *Lexer) tokenize() []Token {
 				token = createToken(tokens[strings.ToUpper(string(word))], string(word))
 			} else if isType(string(word)) {
 				token = createToken(tokens["TYPE"], string(word))
-			} else if isBool(string(word)) {
-				token = createToken(tokens["BOOL"], string(word))
+			} else if isPrimary(string(word)) {
+				token = createToken(tokens["PRIMARY"], string(word))
 			} else {
 				token = createToken(tokens["IDENT"], string(word))
 			}

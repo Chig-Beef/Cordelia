@@ -1,3 +1,15 @@
-loop int i = 0; i <= 10; i = i + 1; {
-	const int z = 10;
+fun out() {}
+
+mut bool prime;
+loop int i = 2; i <= 100; i = i + 1; {
+	prime = true;
+	loop int j = 2; j <= i; j = j + 1; {
+        const int z = i % j;
+		if z == 0 {
+			prime = false;
+		}
+	}
+    if prime {
+		out(i);
+	}
 }

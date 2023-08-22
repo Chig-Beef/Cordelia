@@ -33,6 +33,8 @@ func main() {
 		return
 	}
 
+	//parsedSource.print("")
+
 	semanticizer := Semanticizer{
 		parsedSource,
 	}
