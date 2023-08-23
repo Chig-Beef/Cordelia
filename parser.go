@@ -543,8 +543,13 @@ func (psr *Parser) comparison() (Token, error) {
 	}
 	tkn.children = append(tkn.children, temp)
 
-	for psr.peekToken().code == tokens["BOPERATOR"] {
+	for psr.peekToken().code == tokens["BOPERATOR"] || psr.peekToken().code == tokens["INDECISIVE"] {
 		psr.getNextToken()
+		if psr.curToken.code == tokens["INDECISIVE"] {
+			if psr.curToken.text == "<" || psr.curToken.text == ">" {
+				psr.curToken.code = tokens["BOPERATOR"]
+			}
+		}
 		tkn.children = append(tkn.children, psr.curToken)
 		psr.getNextToken()
 

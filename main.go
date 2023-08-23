@@ -39,7 +39,7 @@ func main() {
 		parsedSource,
 	}
 
-	err = semanticizer.checkValid(semanticizer.source, map[string][]string{})
+	err = semanticizer.checkValid(semanticizer.source, inBuiltFuncs)
 	if err != nil {
 		fmt.Println(err)
 		return

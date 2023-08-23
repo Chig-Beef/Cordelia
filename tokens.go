@@ -53,6 +53,7 @@ func getTokenKey(code int) string {
 var types []string = []string{
 	"int",
 	"bool",
+	"string",
 }
 
 var keyWords []string = []string{

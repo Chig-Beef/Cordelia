@@ -132,6 +132,14 @@ func (lxr *Lexer) tokenize() []Token {
 			}
 			number := lxr.source[startPos : lxr.curPos+1]
 			token = createToken(tokens["PRIMARY"], string(number))
+		} else if lxr.curChar == '"' {
+			startPos := lxr.curPos
+			lxr.getNextChar()
+			for lxr.curChar != '"' {
+				lxr.getNextChar()
+			}
+			word := lxr.source[startPos : lxr.curPos+1]
+			token = createToken(tokens["PRIMARY"], string(word))
 		}
 
 		tkns = append(tkns, token)

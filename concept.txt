@@ -89,13 +89,14 @@ Example code 2:
 mut bool prime;
 loop int i = 2; i < 100; i = i + 1; {
 	prime = true;
-	loop int j = 2; j < i; j++; {
-		if i % j == 0 {
+	loop int j = 2; j < i; j = j + 1; {
+		const int z = i % j;
+		if z == 0 {
 			prime = false;
 		}
 	}
 	if prime {
-		out(i.to(str));
+		out(i);
 	}
 }
 
@@ -115,7 +116,6 @@ loop int i = 2; i < 100; i++; {
 		out(i.to(str));
 	}
 }
-
 
 
 
