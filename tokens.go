@@ -51,9 +51,24 @@ func getTokenKey(code int) string {
 }
 
 var types []string = []string{
+	"lam",
+	"num",
 	"int",
+	"int8",
+	"int16",
+	"int32",
+	"int64",
+	"unt",
+	"unt8",
+	"unt16",
+	"unt32",
+	"unt64",
 	"bool",
-	"string",
+	"char",
+	"str",
+	"flt",
+	"dob",
+	"acc",
 }
 
 var keyWords []string = []string{

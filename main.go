@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"time"
 )
 
 func main() {
+	start := time.Now()
+
 	dat, err := os.ReadFile("example.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -52,4 +56,7 @@ func main() {
 	optimizedSource := optimizer.optimize(optimizer.source)
 
 	optimizedSource.print("")
+
+	ellapsed := time.Since(start)
+	fmt.Println("Compilation Completed in: " + strconv.Itoa(int(ellapsed.Milliseconds())) + "ms")
 }

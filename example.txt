@@ -1,12 +1,15 @@
-mut bool prime;
-loop int i = 2; i < 100; i = i + 1; {
-	prime = true;
-	loop int j = 2; j < i; j = j + 1; {
-		if i % j == 0 {
+`` Find all Prime numbers from 2 -> 100
+f();
+fun checkPrime(int n) {
+	mut bool prime = true;
+	loop int j = 2; j < n; j = j + 1; {
+		if n % j == 0 {
 			prime = false;
 		}
 	}
 	if prime {
-		out(i.to(str));
+		out(n);
 	}
 }
+
+checkPrime(7);

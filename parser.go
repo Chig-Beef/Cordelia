@@ -254,28 +254,30 @@ func (psr *Parser) statement() (Token, error) {
 
 			return tkn, nil
 		}
+		subTkn := createToken(tokens["ASSIGNMENT"], "")
 
-		tkn.children = append(tkn.children, createToken(tokens["IDENT"], psr.curToken.text))
+		subTkn.children = append(subTkn.children, createToken(tokens["IDENT"], psr.curToken.text))
 		psr.getNextToken()
 
 		if psr.curToken.code != tokens["ASSIGN"] {
 			return tkn, createError("Parser", "statement -> IDENT", "Expected \"ASSIGN\"")
 		}
-		tkn.children = append(tkn.children, psr.curToken)
+		subTkn.children = append(subTkn.children, psr.curToken)
 		psr.getNextToken()
 
 		temp, err = psr.expression()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
 		psr.getNextToken()
 
 		temp, err = psr.el()
 		if err != nil {
 			return tkn, err
 		}
-		tkn.children = append(tkn.children, temp)
+		subTkn.children = append(subTkn.children, temp)
+		tkn.children = append(tkn.children, subTkn)
 	case tokens["LOOP"]:
 		tkn.children = append(tkn.children, createToken(tokens["LOOP"], "loop"))
 		psr.getNextToken()
@@ -510,6 +512,35 @@ func (psr *Parser) block() (Token, error) {
 	return tkn, nil
 }
 
+func (psr *Parser) comparison() (Token, error) {
+	tkn := createToken(tokens["COMPARISON"], "")
+
+	temp, err := psr.expression()
+	if err != nil {
+		return tkn, createError("Parser", "comparison", "Expected \"EXPRESSION\"")
+	}
+	tkn.children = append(tkn.children, temp)
+
+	for psr.peekToken().code == tokens["BOPERATOR"] || psr.peekToken().code == tokens["INDECISIVE"] {
+		psr.getNextToken()
+		if psr.curToken.code == tokens["INDECISIVE"] {
+			if psr.curToken.text == "<" || psr.curToken.text == ">" {
+				psr.curToken.code = tokens["BOPERATOR"]
+			}
+		}
+		tkn.children = append(tkn.children, psr.curToken)
+		psr.getNextToken()
+
+		temp, err = psr.expression()
+		if err != nil {
+			return tkn, createError("Parser", "comparison", "Expected \"EXPRESSION\"")
+		}
+		tkn.children = append(tkn.children, temp)
+	}
+
+	return tkn, nil
+}
+
 func (psr *Parser) expression() (Token, error) {
 	tkn := createToken(tokens["EXPRESSION"], "")
 
@@ -527,35 +558,6 @@ func (psr *Parser) expression() (Token, error) {
 		temp, err = psr.value()
 		if err != nil {
 			return tkn, createError("Parser", "expression", "Expected \"VALUE\"")
-		}
-		tkn.children = append(tkn.children, temp)
-	}
-
-	return tkn, nil
-}
-
-func (psr *Parser) comparison() (Token, error) {
-	tkn := createToken(tokens["COMPARISON"], "")
-
-	temp, err := psr.value()
-	if err != nil {
-		return tkn, createError("Parser", "comparison", "Expected \"VALUE\"")
-	}
-	tkn.children = append(tkn.children, temp)
-
-	for psr.peekToken().code == tokens["BOPERATOR"] || psr.peekToken().code == tokens["INDECISIVE"] {
-		psr.getNextToken()
-		if psr.curToken.code == tokens["INDECISIVE"] {
-			if psr.curToken.text == "<" || psr.curToken.text == ">" {
-				psr.curToken.code = tokens["BOPERATOR"]
-			}
-		}
-		tkn.children = append(tkn.children, psr.curToken)
-		psr.getNextToken()
-
-		temp, err = psr.value()
-		if err != nil {
-			return tkn, createError("Parser", "comparison", "Expected \"VALUE\"")
 		}
 		tkn.children = append(tkn.children, temp)
 	}

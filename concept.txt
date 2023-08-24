@@ -30,8 +30,8 @@ untx   => unt of size x (8, 16, 32, 64)
 bool   => true/false
 char   => A single ascii character
 str    => A collection of characters
-float  => A number that includes decimal places
-double => A float with twice as many decimal places
+flt  => A number that includes decimal places
+dob => A float with twice as many decimal places
 acc    => An accurate float
 
 Structures:

@@ -23,7 +23,7 @@ func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
 		err = nil
 		_, exists := data[tkn.text]
 		if !exists {
-			err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment.")
+			err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment ("+tkn.text+")")
 		}
 	case tokens["REF"]:
 		err = nil
@@ -120,9 +120,15 @@ func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
 			newVar = append(newVar, "change", "assign")
 			newVar = append(newVar, "type:"+tkn.children[0].text)
 			data[tkn.children[1].text] = newVar
+		} else if tkn.children[0].code == tokens["IDENT"] {
+			variable, exists := data[tkn.children[0].text]
+			if !exists {
+				err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment")
+			} else if !slices.Contains(variable, "assign") {
+				err = createError("Semantics", "checkValid", "Attempt was made to reassign an unassignable \"IDENT\"")
+			}
 		}
 	case tokens["DEFINITION"]:
-
 		err = nil
 		newVar := []string{"callable"}
 
@@ -130,15 +136,23 @@ func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
 		if tkn.children[index].code == tokens["IDENT"] {
 			data[tkn.children[index].text] = newVar
 		} else {
-			index++
 			for tkn.children[index].code != tokens["RBRACE"] {
 				index++
 			}
 			index++
 			data[tkn.children[index].text] = newVar
 		}
+		index += 3
+		for tkn.children[index].code != tokens["BLOCK"] {
+			data[tkn.children[index].text] = []string{"type:" + tkn.children[index-1].text}
+			index += 2
+		}
 	default:
 		return createError("Semantics", "checkValid", "Token not recognised")
+	}
+
+	if err != nil {
+		return err
 	}
 
 	for i := 0; i < len(tkn.children); i++ {

@@ -16,9 +16,9 @@ block := "{" { statement } "}"
 
 ref := "@" | "&"
 
-expression := value [operator value]
+comparison := expression [boperator expression]
 
-comparison := value [boperator value]
+expression := value [operator value]
 
 operator := "+" | "-" | "*" | "/" | "**" | "//" | "%"
 

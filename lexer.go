@@ -23,11 +23,16 @@ func (lxr *Lexer) tokenize() []Token {
 
 		switch lxr.curChar {
 		case '`':
-			for lxr.curChar != '\n' && lxr.curChar != '\r' {
-				lxr.getNextChar()
+
+			if lxr.getPeek() == '`' {
+				for lxr.curChar != '\n' && lxr.curChar != '\r' {
+					lxr.getNextChar()
+				}
+				lxr.getNextCharNoWhiteSpace()
+				continue
+			} else {
+				token.text = "`"
 			}
-			lxr.getNextCharNoWhiteSpace()
-			continue
 		case '+':
 			token = createToken(tokens["OPERATOR"], "+")
 		case '-':
