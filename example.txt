@@ -1,15 +1,5 @@
-`` Find all Prime numbers from 2 -> 100
-f();
-fun checkPrime(int n) {
-	mut bool prime = true;
-	loop int j = 2; j < n; j = j + 1; {
-		if n % j == 0 {
-			prime = false;
-		}
-	}
-	if prime {
-		out(n);
-	}
+stt y {
+	int z
 }
 
-checkPrime(7);
+const int x = y.z;

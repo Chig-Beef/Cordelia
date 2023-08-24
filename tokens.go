@@ -140,4 +140,5 @@ var tokens map[string]int = map[string]int{
 	"CALL":       105,
 	"ASSIGNMENT": 106,
 	"DEFINITION": 107,
+	"ACCESS":     108,
 }

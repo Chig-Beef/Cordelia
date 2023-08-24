@@ -1,7 +1,10 @@
 program := { statement }
 
+block := "{" { statement } "}"
+
 statement :=
     fun ["(" type [ref] ident ")"] ident "("(type ident ",")+")" block
+    stt ident "{" (type ident ",")+ "}"
     mut type ident ["=" expression] el
     const type ident "=" expression el
     noas type ident ["=" expression] el
@@ -9,12 +12,6 @@ statement :=
     if comparison block ([elif comparison block])+ [else block]
     ident "=" expression el
     call el
-
-call := ident "(" (value ",")+ ")"
-
-block := "{" { statement } "}"
-
-ref := "@" | "&"
 
 comparison := expression [boperator expression]
 
@@ -24,6 +21,12 @@ operator := "+" | "-" | "*" | "/" | "**" | "//" | "%"
 
 boperator := "&&" | "||" | "!=" | "==" | "<" | ">" | "<=" | ">="
 
-el := ";"
+call := ident "(" (value ",")+ ")"
 
-value := ident | primary | call
+value := ident | primary | call | access
+
+access := indent "." (ident | call | access)
+
+ref := "@" | "&"
+
+el := ";"

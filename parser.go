@@ -130,6 +130,48 @@ func (psr *Parser) statement() (Token, error) {
 		}
 		subTkn.children = append(subTkn.children, temp)
 		tkn.children = append(tkn.children, subTkn)
+	case tokens["STT"]:
+		subTkn := createToken(tokens["DEFINITION"], "")
+
+		subTkn.children = append(subTkn.children, createToken(tokens["STT"], "stt"))
+		psr.getNextToken()
+
+		if psr.curToken.code != tokens["IDENT"] {
+			return tkn, createError("Parser", "statement -> STT", "Expected \"IDENT\"")
+		}
+		subTkn.children = append(subTkn.children, psr.curToken)
+		psr.getNextToken()
+
+		if psr.curToken.code != tokens["LSQUIRLY"] {
+			return tkn, createError("Parser", "statement -> STT", "Expected \"LSQUIRLY\"")
+		}
+		subTkn.children = append(subTkn.children, psr.curToken)
+		psr.getNextToken()
+
+		for psr.curToken.code == tokens["TYPE"] {
+			subTkn.children = append(subTkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code != tokens["IDENT"] {
+				return tkn, createError("Parser", "statement -> STT", "Expected \"IDENT\"")
+			}
+			subTkn.children = append(subTkn.children, psr.curToken)
+			psr.getNextToken()
+
+			if psr.curToken.code == tokens["DELIMETER"] {
+				if psr.peekToken().code != tokens["TYPE"] {
+					return tkn, createError("Parser", "statement -> STT", "Expected \"TYPE\"")
+				}
+				subTkn.children = append(subTkn.children, psr.curToken)
+				psr.getNextToken()
+			}
+		}
+
+		if psr.curToken.code != tokens["RSQUIRLY"] {
+			return tkn, createError("Parser", "statement -> STT", "Expected \"RSQUIRLY\"")
+		}
+		subTkn.children = append(subTkn.children, psr.curToken)
+		tkn.children = append(tkn.children, subTkn)
 	case tokens["MUT"]:
 		subTkn := createToken(tokens["ASSIGNMENT"], "")
 
@@ -580,8 +622,48 @@ func (psr *Parser) value() (Token, error) {
 		if err == nil {
 			return temp, nil
 		}
+		temp, err = psr.access()
+		if err == nil {
+			return temp, nil
+		}
 		return psr.curToken, nil
 	} else {
 		return psr.curToken, createError("Parser", "value", "Expected \"PRIMARY\" or \"IDENT\" or \"CALL\"")
 	}
+}
+
+func (psr *Parser) access() (Token, error) {
+	tkn := createToken(tokens["ACCESS"], "")
+	psr.setMarker()
+
+	if psr.curToken.code != tokens["IDENT"] {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "access", "Expected \"IDENT\"")
+	}
+	tkn.children = append(tkn.children, psr.curToken)
+	psr.getNextToken()
+
+	if psr.curToken.code != tokens["ACCESSOR"] {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "access", "Expected \"ACCESSOR\"")
+	}
+	tkn.children = append(tkn.children, psr.curToken)
+	psr.getNextToken()
+
+	if psr.curToken.code == tokens["IDENT"] {
+		tkn.children = append(tkn.children, psr.curToken)
+	} else if temp, err := psr.call(); err != nil {
+		tkn.children = append(tkn.children, temp)
+	} else if temp, err := psr.access(); err != nil {
+		tkn.children = append(tkn.children, temp)
+	} else {
+		psr.gotoMarker()
+		psr.removeMarker()
+		return tkn, createError("Parser", "access", "Expected \"IDENT\" or \"CALL\" or \"ACCESS\"")
+	}
+
+	psr.removeMarker()
+	return tkn, nil
 }

@@ -1,0 +1,22 @@
+Static typing
+Type inference
+Errors as values
+Strict typing (int32 != int16)
+Easy type conversions
+Compiles to bytecode first
+Easy string manipulation
+Functions as variables
+Good concurrency
+Good parallelism
+Memory safety
+Good zero cost abstraction (iterators)
+Pattern matching
+Wasm compile?
+Interpreted mode?
+Great portability
+Readable
+Easy to learn
+Classes
+Structs
+Easy and safe access to files
+LSP

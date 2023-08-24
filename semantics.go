@@ -8,144 +8,148 @@ type Semanticizer struct {
 	source Token
 }
 
-func (smr *Semanticizer) checkValid(tkn Token, data map[string][]string) error {
-	var err error
+type Variable struct {
+	Name      string
+	Modifiers []string
+	Type      string
+	Variables []Variable
+}
+
+func (vr Variable) containsVar(name string) bool {
+	for _, ident := range vr.Variables {
+		if ident.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (smr *Semanticizer) checkValid(tkn Token, data map[string]Variable) error {
+	var err error = nil
 
 	switch tkn.code {
 	case tokens["EOF"]:
-		err = nil
 	case tokens["ILLEGAL"]:
 		err = createError("Semantics", "checkValid", "Cannot have \"ILLEGAL\" token")
 	// INDECISIVE
 	case tokens["EL"]:
-		err = nil
 	case tokens["IDENT"]:
-		err = nil
 		_, exists := data[tkn.text]
 		if !exists {
 			err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment ("+tkn.text+")")
 		}
 	case tokens["REF"]:
-		err = nil
 	case tokens["OPERATOR"]:
-		err = nil
 	case tokens["COMPARATOR"]:
-		err = nil
 	case tokens["TYPE"]:
-		err = nil
 	case tokens["PRIMARY"]:
-		err = nil
 	case tokens["DELIMETER"]:
-		err = nil
 	case tokens["ACCESSOR"]:
-		err = nil
 	case tokens["NOT"]:
-		err = nil
 	case tokens["ASSIGN"]:
-		err = nil
 	case tokens["BOPERATOR"]:
-		err = nil
 	case tokens["FUN"]:
-		err = nil
 	case tokens["MUT"]:
-		err = nil
 	case tokens["CONST"]:
-		err = nil
 	case tokens["NOAS"]:
-		err = nil
 	case tokens["LOOP"]:
-		err = nil
 	case tokens["IF"]:
-		err = nil
 	case tokens["ELIF"]:
-		err = nil
 	case tokens["ELSE"]:
-		err = nil
 	case tokens["CLS"]:
-		err = nil
 	case tokens["STT"]:
-		err = nil
 	case tokens["NULL"]:
-		err = nil
 	case tokens["LSQUIRLY"]:
-		err = nil
 	case tokens["RSQUIRLY"]:
-		err = nil
 	case tokens["LBRACE"]:
-		err = nil
 	case tokens["RBRACE"]:
-		err = nil
 	case tokens["LSQUARE"]:
-		err = nil
 	case tokens["RSQUARE"]:
-		err = nil
 	case tokens["LANGLE"]:
-		err = nil
 	case tokens["RANGLE"]:
-		err = nil
 	case tokens["PROGRAM"]:
-		err = nil
 	case tokens["BLOCK"]:
-		err = nil
 	case tokens["EXPRESSION"]:
-		err = nil
 	case tokens["COMPARISON"]:
-		err = nil
 	case tokens["STATEMENT"]:
-		err = nil
 	case tokens["CALL"]:
 		err = smr.checkValid(tkn.children[0], data)
 		if err != nil {
 			return err
 		}
-		variable := data[tkn.children[0].text]
-		if !slices.Contains(variable, "callable") {
+		temp := data[tkn.children[0].text]
+		if !slices.Contains(temp.Modifiers, "callable") {
 			return createError("Semantics", "checkValid", "Attempted to call an uncallable \"IDENT\"")
 		}
 	case tokens["ASSIGNMENT"]:
-		err = nil
-		newVar := []string{}
+		newVar := Variable{}
 		if tkn.children[0].code == tokens["MUT"] {
-			newVar = append(newVar, "change", "assign")
-			newVar = append(newVar, "type:"+tkn.children[1].text)
+			newVar.Modifiers = append(newVar.Modifiers, "change", "assign")
+			newVar.Type = tkn.children[1].text
 			data[tkn.children[2].text] = newVar
 		} else if tkn.children[0].code == tokens["NOAS"] {
-			newVar = append(newVar, "change")
-			newVar = append(newVar, "type:"+tkn.children[1].text)
+			newVar.Modifiers = append(newVar.Modifiers, "change")
+			newVar.Type = tkn.children[1].text
 			data[tkn.children[2].text] = newVar
 		} else if tkn.children[0].code == tokens["CONST"] {
-			newVar = append(newVar, "type:"+tkn.children[1].text)
+			newVar.Type = tkn.children[1].text
 			data[tkn.children[2].text] = newVar
 		} else if tkn.children[0].code == tokens["TYPE"] {
-			newVar = append(newVar, "change", "assign")
-			newVar = append(newVar, "type:"+tkn.children[0].text)
+			newVar.Modifiers = append(newVar.Modifiers, "change", "assign")
+			newVar.Type = tkn.children[0].text
 			data[tkn.children[1].text] = newVar
 		} else if tkn.children[0].code == tokens["IDENT"] {
 			variable, exists := data[tkn.children[0].text]
 			if !exists {
 				err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment")
-			} else if !slices.Contains(variable, "assign") {
+			} else if !slices.Contains(variable.Modifiers, "assign") {
 				err = createError("Semantics", "checkValid", "Attempt was made to reassign an unassignable \"IDENT\"")
 			}
 		}
 	case tokens["DEFINITION"]:
-		err = nil
-		newVar := []string{"callable"}
+		if tkn.children[0].code == tokens["FUN"] {
+			newVar := Variable{"", []string{"callable"}, "function", []Variable{}}
 
-		index := 1
-		if tkn.children[index].code == tokens["IDENT"] {
-			data[tkn.children[index].text] = newVar
-		} else {
-			for tkn.children[index].code != tokens["RBRACE"] {
+			index := 1
+			if tkn.children[index].code == tokens["IDENT"] {
+				newVar.Name = tkn.children[index].text
+				data[tkn.children[index].text] = newVar
+			} else {
+				for tkn.children[index].code != tokens["RBRACE"] {
+					index++
+				}
 				index++
+				data[tkn.children[index].text] = newVar
 			}
 			index++
-			data[tkn.children[index].text] = newVar
+			for tkn.children[index].code != tokens["RBRACE"] {
+				index++
+				data[tkn.children[index+1].text] = Variable{tkn.children[index+1].text, []string{}, tkn.children[index].text, []Variable{}}
+				index += 2
+			}
+		} else if tkn.children[0].code == tokens["STT"] {
+			newVar := Variable{tkn.children[1].text, []string{"instantiates"}, "struct", []Variable{}}
+
+			index := 2
+			for tkn.children[index].code != tokens["RSQUIRLY"] {
+				index++
+				temp := Variable{tkn.children[index+1].text, []string{}, tkn.children[index].text, []Variable{}}
+				newVar.Variables = append(newVar.Variables, temp)
+				data[tkn.children[index+1].text] = temp
+				index += 2
+			}
+			data[tkn.children[1].text] = newVar
 		}
-		index += 3
-		for tkn.children[index].code != tokens["BLOCK"] {
-			data[tkn.children[index].text] = []string{"type:" + tkn.children[index-1].text}
-			index += 2
+	case tokens["ACCESS"]:
+		temp, exists := data[tkn.children[0].text]
+		if !exists {
+			err = createError("Semantics", "checkValid", "\"IDENT\" was referenced before assignment ("+tkn.text+")")
+		}
+		if len(temp.Variables) == 0 {
+			err = createError("Semantics", "checkValid", "access was attempted on struct with no properties or methods ("+tkn.text+")")
+		}
+		if !temp.containsVar(tkn.children[2].text) {
+			err = createError("Semantics", "checkValid", "\""+tkn.children[0].text+"\" does not contain property or method \""+tkn.children[2].text+"\"")
 		}
 	default:
 		return createError("Semantics", "checkValid", "Token not recognised")

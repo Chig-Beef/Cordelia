@@ -57,6 +57,20 @@ func main() {
 
 	optimizedSource.print("")
 
-	ellapsed := time.Since(start)
-	fmt.Println("Compilation Completed in: " + strconv.Itoa(int(ellapsed.Milliseconds())) + "ms")
+	unit := "µs"
+	ellapsed := time.Since(start).Microseconds()
+	if ellapsed > 1000 {
+		ellapsed /= 1000
+		unit = "ms"
+		if ellapsed > 1000 {
+			ellapsed /= 1000
+			unit = "s"
+			if ellapsed > 60 {
+				ellapsed /= 60
+				unit = "m"
+			}
+		}
+	}
+
+	fmt.Println("Compilation Completed in: " + strconv.Itoa(int(ellapsed)) + unit)
 }
